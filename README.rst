@@ -55,3 +55,7 @@ Resources
 ---------
 
 `Quick R <http://www.statmethods.net/>`_
+
+`Tidy Data <http://courses.had.co.nz.s3-website-us-east-1.amazonaws.com/12-rice-bdsi/slides/07-tidy-data.pdf>`_
+
+`Data formatting tutorial <http://flowingdata.com/2015/02/18/loading-data-and-basic-formatting-in-r/>`_
