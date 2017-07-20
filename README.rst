@@ -53,3 +53,5 @@ Attribute description
 
 Resources
 ---------
+
+`Quick R <http://www.statmethods.net/>`_
