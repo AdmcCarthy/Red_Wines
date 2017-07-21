@@ -63,3 +63,7 @@ Resources
 `Information on QQ plots <https://www.stat.auckland.ac.nz/~ihaka/787/lectures-quantiles.pdf>`_
 
 `Graphical parameters <https://www.rdocumentation.org/packages/graphics/versions/3.4.0/topics/par>`_
+
+`Fitting KDE to histogram <https://stackoverflow.com/questions/1497539/fitting-a-density-curve-to-a-histogram-in-r>`_
+
+`QQ norm confidence intervals <https://rdrr.io/cran/extRemes/man/qqnorm.html>`_
