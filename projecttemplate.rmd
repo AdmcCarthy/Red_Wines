@@ -1,58 +1,224 @@
-TITLE by YOUR_NAME_HERE
+Investigating Red Wine by Adam McCarthy
 ========================================================
 
-> **Tip**: You will see quoted sections like this throughout the template to
-help you construct your report. Make sure that you remove these notes before
-you finish and submit your project!
-
-> **Tip**: One of the requirements of this project is that your code follows
-good formatting techniques, including limiting your lines to 80 characters or
-less. If you're using RStudio, go into Preferences \> Code \> Display to set up
-a margin line to help you keep track of this guideline!
-
 ```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
-# Load all of the packages that you end up using in your analysis in this code
-# chunk.
-
-# Notice that the parameter "echo" was set to FALSE for this code chunk. This
-# prevents the code from displaying in the knitted HTML output. You should set
-# echo=FALSE for all code chunks in your file, unless it makes sense for your
-# report to show the code that generated a particular plot.
-
-# The other parameters for "message" and "warning" should also be set to FALSE
-# for other code chunks once you have verified that each plot comes out as you
-# want it to. This will clean up the flow of your report.
 
 library(ggplot2)
+library(ggthemes)
+library(scales)
 ```
 
-```{r echo=FALSE, Load_the_Data}
+```{r echo=FALSE, message=FALSE, warning=FALSE, Load_the_Data}
+setwd('./data')
 # Load the Data
-
+red_wine <- read.csv('wineQualityReds.csv')
+setwd('..')
 ```
 
-> **Tip**: Before you create any plots, it is a good idea to provide a short
-introduction into the dataset that you are planning to explore. Replace this
-quoted text with that general information!
+```{r echo=FALSE, message=FALSE, warning=FALSE, Process_the_Data}
+# Create a new categorical variable for quality
+red_wine['quality_c'] <- ifelse(red_wine$quality <= 5, "lower", "upper")
+
+# To be able to represent quality as a categorical variable
+#
+# Assign a full range of levels to represent 0-10
+# red_wine$quality <- factor(red_wine$quality)
+# levels(red_wine$quality) <- c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+
+# Assign categorical groups as levels
+# red_wine$quality_c <- factor(red_wine$quality_c)
+# levels(red_wine$quality_c) <- ordered(c("poor", "fair", "good"))
+```
+
+> **Dataset**: Red wine dataset consiting of 1599 variants of the Portuguese "Vinho Verde" wine. Includes physicochemical (inputs) and sensory (the output) variables. This dataset is public available for research. The details are described in [Cortez et al., 2009].
 
 # Univariate Plots Section
 
-> **Tip**: In this section, you should perform some preliminary exploration of
-your dataset. Run some summaries of the data and create univariate plots to
-understand the structure of the individual variables in your dataset. Don't
-forget to add a comment after each plot or closely-related group of plots!
-There should be multiple code chunks and text sections; the first one below is
-just to help you get started.
+> **Overview**: There are 13 variables within the original dataset. Of these one is a
+dependent variable giving a subjective measure of quality based on experts
+sensory reviw of the wine. The main 11 variables are independent physiochemical
+tests. These may be inter-related but are initially thought of as individual
+measurements.
+
+See [here](https://s3.amazonaws.com/udacity-hosted-downloads/ud651/wineQualityInfo.txt) for more information.
+
+  
+ * X - Each row of data, each wine type tested.    - Index
+ 
+ Input variables (based on physicochemical tests):
+ 
+ * 1 - fixed acidity, tartaric acid - $(g/dm^{3})$
+ * 2 - volatile acidity, acetic acid - $(g/dm^{3})$
+ * 3 - citric acid - $(g/dm^{3})$
+ * 4 - residual sugar - $(g/dm^{3})$
+ * 5 - chlorides, sodium chloride - $(g/dm^{3})$
+ * 6 - free sulfur dioxide $(mg/dm^{3})$
+ * 7 - total sulfur dioxide $(mg/dm^{3})$
+ * 8 - density $(g/cm^{3})$
+ * 9 - pH
+ * 10 - sulphates, potassium sulphate - $(g/dm^{3})$
+ * 11 - alcohol (% by volume)
+
+ Output variable (based on sensory data):
+ 
+ * 12 - quality (score between 0 and 10)
+ * 13 - quality_c (quality grouped into lower and upper)
 
 ```{r echo=FALSE, Univariate_Plots}
-
+summary(red_wine)
 ```
 
-> **Tip**: Make sure that you leave a blank line between the start / end of
-each code block and the end / start of your Markdown text so that it is
-formatted nicely in the knitted text. Note as well that text on consecutive
-lines is treated as a single space. Make sure you have a blank line between
-your paragraphs so that they too are formatted for easy readability.
+The summary table depicts descriptive statistics for all of the variables.
+
+Quality is measured from 0-10 based. To plot effectively each 
+element from 0-10 is included to ensure the representation of data 
+is better presented. 
+This variable has been reformatted to a factor with 11 levels (from orignal 6).
+
+One categorical variables within the dataset is generated to
+group quality into two categories. Lower (<=5) and Upper (>5).
+This will be used to explore for any major differences in values.
+
+Ph is on a scale of 0 to 14 (potential of hydrogen), 
+all values here are acidic (<7) with the range
+occuring between 2.7-4.
+
+Alcholol is measured in percentages.
+
+The other variables are all numeric data types.
+
+There are no missing values within the dataset.
+
+```{r echo=FALSE, Univariate_Plots_Quality}
+ggplot(data=red_wine, aes(red_wine$quality)) + 
+  geom_bar(fill="#9099A2") +
+  theme_tufte() +
+  labs(
+    title="Distribution of Quality"
+    ) +
+  labs(
+    x="Quality",
+    y="Count"
+    )
+```
+
+Quality is between 2 and 8 despite the scoring range being 0-10. The majority
+of values are 5 and 6. There is skew to the right tail giving more positive
+scores in 7. Giving the poor sampling of scores outside of 5 and 6 the quality
+measure will be split into two categories, upper (>5) and lower (<=5).
+
+```{r echo=FALSE, Multiplot_function}
+# Entirely taken from:
+# http://www.cookbook-r.com/Graphs/Multiple_graphs_on_one_page_(ggplot2)/
+# Multiple plot function
+#
+# ggplot objects can be passed in ..., or to plotlist (as a list of ggplot objects)
+# - cols:   Number of columns in layout
+# - layout: A matrix specifying the layout. If present, 'cols' is ignored.
+#
+# If the layout is something like matrix(c(1,2,3,3), nrow=2, byrow=TRUE),
+# then plot 1 will go in the upper left, 2 will go in the upper right, and
+# 3 will go all the way across the bottom.
+#
+multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
+  library(grid)
+
+  # Make a list from the ... arguments and plotlist
+  plots <- c(list(...), plotlist)
+
+  numPlots = length(plots)
+
+  # If layout is NULL, then use 'cols' to determine layout
+  if (is.null(layout)) {
+    # Make the panel
+    # ncol: Number of columns of plots
+    # nrow: Number of rows needed, calculated from # of cols
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+                    ncol = cols, nrow = ceiling(numPlots/cols))
+  }
+
+ if (numPlots==1) {
+    print(plots[[1]])
+
+  } else {
+    # Set up the page
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+
+    # Make each plot, in the correct location
+    for (i in 1:numPlots) {
+      # Get the i,j matrix positions of the regions that contain this subplot
+      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+
+      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                      layout.pos.col = matchidx$col))
+    }
+  }
+}
+```
+
+```{r echo=FALSE, Univariate_Plots_multi, fig.height = 6, fig.width = 6}
+small_hist <- function(data_v, name, scale, df=red_wine) {
+plt <- ggplot(data = df, aes(data_v)) + 
+  geom_histogram(bins = 50,
+                 col = "white",
+                 fill = "#9099A2"
+                 ) +
+  theme_tufte() +
+  labs(
+    title = name
+    ) +
+  labs(
+    x = scale,
+    y = "Count"
+    )
+
+return(plt)
+}
+
+plt1 <- small_hist(red_wine$fixed.acidity, "Fixed Acidity", "g/dm^3")
+plt2 <- small_hist(red_wine$volatile.acidity, "Volatile Acidity", "g/dm^3")
+plt3 <- small_hist(red_wine$citric.acid, "Citric Acidity", "g/dm^3")
+plt4 <- small_hist(red_wine$residual.sugar, "Residual Sugar", "g/dm^3")
+plt5 <- small_hist(red_wine$chlorides, "Chlorides", "g/dm^3")
+plt6 <- small_hist(red_wine$pH, "pH", "pH scale")
+
+multiplot(plt1, plt2, plt3, plt4, plt5, plt6, cols = 2)
+```
+
+Starting to investigate further variables a group of 6 measurements are placed
+into histograms to understand their distributions. Of these pH, Fixed acidity
+and Volatile Acidity have slightly normal distributions, these could be investigated further using quantile quantile plots.
+
+Residual Sugar and Chlorides both appear to have highly skewed, over dispersed
+data, these could be explored using a transformation to investigate the
+distribution of values further.
+
+Citric Acidity has two spikes, one occuring at 0 and one around 0.5. Bin size
+could be changed to investigate if there is some artifact in the data related
+to rounding.
+
+```{r echo=FALSE, Univariate_Plots_multi_2, fig.height = 4, fig.width = 6}
+plt7 <- small_hist(red_wine$free.sulfur.dioxide, 
+  "Free Sulphar Dioxide", "mg/dm^3")
+plt8 <- small_hist(red_wine$total.sulfur.dioxide, 
+  "Total Sulphar Dioxide", "mg/dm^3")
+plt9 <- small_hist(red_wine$density, 
+  "Density", "g/dm^3")
+plt10 <- small_hist(red_wine$alcohol, 
+  "Alcohol", "%")
+
+multiplot(plt7, plt8, plt9, plt10, cols = 2)
+```
+
+The remaining four variables are displayed to get an overview of their distriutions. Density appears relatively normal but with occasional spikes,
+these should be checked for rounding issues.
+
+Free sulphar dioxide and total sulphar dioxide have skewed distributions, with
+a sparse population of values towards the maximum.
+
+Alcohol also has a skewed distribution of values but with most values located
+between 9% and 13%.
 
 # Univariate Analysis
 
@@ -84,6 +250,23 @@ as well.
 
 ```{r echo=FALSE, Bivariate_Plots}
 
+```
+
+```{r echo=FALSE, Bivariate_Plots_pH}
+ggplot(data=red_wine, aes(red_wine$pH)) + 
+  geom_histogram(bins=50, 
+                 col="white", 
+                 fill="#9099A2"
+                 ) +
+  theme_tufte() +
+  labs(
+    title="Histogram for pH"
+    ) +
+  labs(
+    x="pH", 
+    y="Count"
+    ) +
+  facet_wrap(~quality_c, ncol = 1)
 ```
 
 # Bivariate Analysis
@@ -171,3 +354,13 @@ future work that could be done with the dataset.
 
 > **Tip**: Don't forget to remove this, and the other **Tip** sections before
 saving your final work and knitting the final report!
+
+# Resources used
+P. Cortez, A. Cerdeira, F. Almeida, T. Matos and J. Reis. 
+Modeling wine preferences by data mining from physicochemical properties.
+In Decision Support Systems, Elsevier, 47(4):547-553. ISSN: 0167-9236.
+Available at: [@Elsevier](http://dx.doi.org/10.1016/j.dss.2009.05.016)
+                [Pre-press (pdf)](http://www3.dsi.uminho.pt/pcortez/winequality09.pdf)
+              [bib](http://www3.dsi.uminho.pt/pcortez/dss09.bib)
+                
+[ggthemes](https://cran.r-project.org/web/packages/ggthemes/vignettes/ggthemes.html)
