@@ -1,4 +1,4 @@
-Investigating Red Wine by Adam McCarthy
+Investigating Red Wine dataset by Adam McCarthy
 ========================================================
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
@@ -6,6 +6,7 @@ Investigating Red Wine by Adam McCarthy
 library(ggplot2)
 library(ggthemes)
 library(scales)
+library(extRemes)
 ```
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Load_the_Data}
@@ -89,7 +90,7 @@ The other variables are all numeric data types.
 
 There are no missing values within the dataset.
 
-```{r echo=FALSE, Univariate_Plots_Quality}
+```{r echo=FALSE, Univariate_Plots_Quality, fig.height = 3, fig.width = 5, fig.align="center"}
 ggplot(data=red_wine, aes(red_wine$quality)) + 
   geom_bar(fill="#9099A2") +
   theme_tufte() +
@@ -106,6 +107,35 @@ Quality is between 2 and 8 despite the scoring range being 0-10. The majority
 of values are 5 and 6. There is skew to the right tail giving more positive
 scores in 7. Giving the poor sampling of scores outside of 5 and 6 the quality
 measure will be split into two categories, upper (>5) and lower (<=5).
+
+```{r echo=FALSE, Univariate_Plots_multi_2, fig.height = 3, fig.width = 5, fig.align="center"}
+small_hist <- function(data_v, name, scale, df=red_wine) {
+plt <- ggplot(data = df, aes(data_v)) + 
+  geom_histogram(bins = 50,
+                 col = "white",
+                 fill = "#9099A2"
+                 ) +
+  theme_tufte() +
+  labs(
+    title = name
+    ) +
+  labs(
+    x = scale,
+    y = "Count"
+    )
+
+return(plt)
+}
+
+plt10 <- small_hist(red_wine$alcohol, 
+  "Alcohol", "%")
+
+plt10
+```
+
+Alcohol also has a skewed distribution of values but with most values located
+between 9% and 13%. A small histogram can give a quick impression of the
+distribution of data more effectively than reading the descriptive statistics.
 
 ```{r echo=FALSE, Multiplot_function}
 # Entirely taken from:
@@ -157,38 +187,27 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
 }
 ```
 
-```{r echo=FALSE, Univariate_Plots_multi, fig.height = 6, fig.width = 6}
-small_hist <- function(data_v, name, scale, df=red_wine) {
-plt <- ggplot(data = df, aes(data_v)) + 
-  geom_histogram(bins = 50,
-                 col = "white",
-                 fill = "#9099A2"
-                 ) +
-  theme_tufte() +
-  labs(
-    title = name
-    ) +
-  labs(
-    x = scale,
-    y = "Count"
-    )
-
-return(plt)
-}
-
+```{r echo=FALSE, Univariate_Plots_multi, fig.height = 6, fig.width = 9}
 plt1 <- small_hist(red_wine$fixed.acidity, "Fixed Acidity", "g/dm^3")
 plt2 <- small_hist(red_wine$volatile.acidity, "Volatile Acidity", "g/dm^3")
 plt3 <- small_hist(red_wine$citric.acid, "Citric Acidity", "g/dm^3")
 plt4 <- small_hist(red_wine$residual.sugar, "Residual Sugar", "g/dm^3")
 plt5 <- small_hist(red_wine$chlorides, "Chlorides", "g/dm^3")
 plt6 <- small_hist(red_wine$pH, "pH", "pH scale")
+plt7 <- small_hist(red_wine$free.sulfur.dioxide, 
+  "Free Sulphar Dioxide", "mg/dm^3")
+plt8 <- small_hist(red_wine$total.sulfur.dioxide, 
+  "Total Sulphar Dioxide", "mg/dm^3")
+plt9 <- small_hist(red_wine$density, 
+  "Density", "g/dm^3")
 
-multiplot(plt1, plt2, plt3, plt4, plt5, plt6, cols = 2)
+multiplot(plt1, plt2, plt3, plt4, plt5, plt6, plt7, plt8, plt9, cols = 3)
 ```
 
-Starting to investigate further variables a group of 6 measurements are placed
+Starting to investigate further variables a group of 9 measurements are placed
 into histograms to understand their distributions. Of these pH, Fixed acidity
-and Volatile Acidity have slightly normal distributions, these could be investigated further using quantile quantile plots.
+and Volatile Acidity have slightly normal distributions, these could be 
+investigated further using quantile quantile plots.
 
 Residual Sugar and Chlorides both appear to have highly skewed, over dispersed
 data, these could be explored using a transformation to investigate the
@@ -198,27 +217,71 @@ Citric Acidity has two spikes, one occuring at 0 and one around 0.5. Bin size
 could be changed to investigate if there is some artifact in the data related
 to rounding.
 
-```{r echo=FALSE, Univariate_Plots_multi_2, fig.height = 4, fig.width = 6}
-plt7 <- small_hist(red_wine$free.sulfur.dioxide, 
-  "Free Sulphar Dioxide", "mg/dm^3")
-plt8 <- small_hist(red_wine$total.sulfur.dioxide, 
-  "Total Sulphar Dioxide", "mg/dm^3")
-plt9 <- small_hist(red_wine$density, 
-  "Density", "g/dm^3")
-plt10 <- small_hist(red_wine$alcohol, 
-  "Alcohol", "%")
-
-multiplot(plt7, plt8, plt9, plt10, cols = 2)
-```
-
-The remaining four variables are displayed to get an overview of their distriutions. Density appears relatively normal but with occasional spikes,
-these should be checked for rounding issues.
+Density appears relatively normal but 
+with occasional spikes, these should be checked for rounding issues.
 
 Free sulphar dioxide and total sulphar dioxide have skewed distributions, with
 a sparse population of values towards the maximum.
 
-Alcohol also has a skewed distribution of values but with most values located
-between 9% and 13%.
+```{r echo=FALSE, hist_pH, fig.height = 4, fig.width = 6, fig.align="center"}
+hist(red_wine$pH,
+     prob=TRUE,
+     breaks=60,
+     col='#9099A2',
+     border="white",
+     col.axis = '#9099A2',
+     col.lab = '#9099A2',
+     col.main = '#192231',
+     bty = 'n')
+lines(density(red_wine$pH),
+      col='#192231', lwd=2)
+lines(density(red_wine$pH, adjust=2), 
+      lty="dotted", col='#192231', lwd=1)
+rug(red_wine$pH, ticksize=0.02, side=1, lwd=0.2)
+```
+
+Two plots detailing pH value.
+
+```{r echo=FALSE, QQ_pH, fig.height = 8, fig.width = 8, fig.align="center"}
+
+qqnorm(red_wine$pH,
+              main = 'pH QQ plot',
+              bty = 'n',  # Frame style
+              col = alpha('#192231', 0.3),  # transparency with col
+              cex = .4,  # scale pof points
+              col.axis = '#9099A2',
+              col.lab = '#9099A2',
+              col.main = '#192231',
+              pch = 20  # point symbol type
+)
+qqline(red_wine$pH, col = '#9099A2', lty = 1)
+```
+
+Now using these two plots pH can be examined in greater detail. pH appears to 
+have light tails as displayed by the overall sigmoidal shape of the points, 
+it displays very fine grained clustering which is related to rounding of 
+values and it shows an overall skew to the right.
+
+Towards the upper right of the quantile quantile plot against a standard 
+normal distribution the line crosses the 95% confidence intervals.
+
+```{r echo=FALSE, QQ_den, fig.height = 4, fig.width = 4, fig.align="center"}
+
+qqnorm(red_wine$density,
+              main = 'Density QQ plot',
+              bty = 'n',  # Frame style
+              col = alpha('#192231', 0.3),  # transparency with col
+              cex = .4,  # scale pof points
+              col.axis = '#9099A2',
+              col.lab = '#9099A2',
+              col.main = '#192231',
+              pch = 20  # point symbol type
+)
+qqline(red_wine$density, col = '#9099A2', lty = 1)
+```
+
+Density also shows light tails and skew to the right leading to the fit for
+a normal distribution exisiting outside of the 95% confidence intervals.
 
 # Univariate Analysis
 
