@@ -66,4 +66,6 @@ Resources
 
 `Fitting KDE to histogram <https://stackoverflow.com/questions/1497539/fitting-a-density-curve-to-a-histogram-in-r>`_
 
+`Use sm libary for KDE comparisson <http://www.statmethods.net/graphs/density.html>`_
+
 `QQ norm confidence intervals <https://rdrr.io/cran/extRemes/man/qqnorm.html>`_
