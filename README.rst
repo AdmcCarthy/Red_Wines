@@ -61,3 +61,5 @@ Resources
 `Data formatting tutorial <http://flowingdata.com/2015/02/18/loading-data-and-basic-formatting-in-r/>`_
 
 `Information on QQ plots <https://www.stat.auckland.ac.nz/~ihaka/787/lectures-quantiles.pdf>`_
+
+`Graphical parameters <https://www.rdocumentation.org/packages/graphics/versions/3.4.0/topics/par>`_
