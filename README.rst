@@ -69,3 +69,5 @@ Resources
 `Use sm libary for KDE comparisson <http://www.statmethods.net/graphs/density.html>`_
 
 `QQ norm confidence intervals <https://rdrr.io/cran/extRemes/man/qqnorm.html>`_
+
+'How to modify colors on ggplot <https://stackoverflow.com/questions/5171263/changing-line-colors-with-ggplot>`_
