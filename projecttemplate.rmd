@@ -7,6 +7,8 @@ library(ggplot2)
 library(ggthemes)
 library(scales)
 library(extRemes)
+library(sm)
+library(gridExtra)
 ```
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Load_the_Data}
@@ -27,8 +29,7 @@ red_wine['quality_c'] <- ifelse(red_wine$quality <= 5, "lower", "upper")
 # levels(red_wine$quality) <- c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 
 # Assign categorical groups as levels
-# red_wine$quality_c <- factor(red_wine$quality_c)
-# levels(red_wine$quality_c) <- ordered(c("poor", "fair", "good"))
+red_wine$quality_c <- factor(red_wine$quality_c)
 ```
 
 > **Dataset**: Red wine dataset consiting of 1599 variants of the Portuguese "Vinho Verde" wine. Includes physicochemical (inputs) and sensory (the output) variables. This dataset is public available for research. The details are described in [Cortez et al., 2009].
@@ -283,6 +284,114 @@ qqline(red_wine$density, col = '#9099A2', lty = 1)
 Density also shows light tails and skew to the right leading to the fit for
 a normal distribution exisiting outside of the 95% confidence intervals.
 
+```{R echo=FALSE, Log_hist, fig.height = 4, fig.width = 5}
+plt11 <- ggplot(aes(x = red_wine$residual.sugar), data =red_wine) +
+  geom_histogram(bins = 60,
+                 col = "white",
+                 fill = "#9099A2"
+                 ) +
+  theme_tufte() +
+  labs(
+    title = "Residual sugar"
+    ) +
+  labs(
+    x = "g/dm^3",
+    y = "Count"
+    )
+plt12 <- plt11 + scale_x_sqrt() +
+    labs(title = "Residual sugar sqrt", x = "g/dm^3 sqrt")
+plt13 <- plt11 + scale_x_log10() +
+    labs(title = "Residual sugar log10", x = "g/dm^3 log10")
+
+grid.arrange(plt11, plt12, plt13, ncol = 1)
+```
+
+To explore over disperssed variables data transformations can be applied.
+The original plot followed by a square root and log10 data transformation is conducted on residual sugar in the above three plots. The data transformations
+give a better representation of the distribution of values. They still have
+long tails towards the right.
+
+```{R echo=FALSE, Log_hists, fig.height = 6, fig.width = 5}
+plt14 <- ggplot(aes(x = red_wine$chlorides), data = red_wine) +
+  geom_histogram(bins = 60,
+                 col = "white",
+                 fill = "#9099A2"
+                 ) +
+  theme_tufte() +
+  labs(
+    title = "Chlorides log10"
+    ) +
+  labs(
+    x = "g/dm^3 log10",
+    y = "Count"
+    ) + scale_x_log10()
+
+plt15 <- ggplot(aes(x = red_wine$citric.acid), data = red_wine) +
+  geom_histogram(bins = 60,
+                 col = "white",
+                 fill = "#9099A2"
+                 ) +
+  theme_tufte() +
+  labs(
+    title = "Citric Acid sqrt"
+    ) +
+  labs(
+    x = "g/dm^3 sqrt",
+    y = "Count"
+    ) + scale_x_sqrt()
+
+plt16 <- ggplot(aes(x = red_wine$total.sulfur.dioxide), data = red_wine) +
+  geom_histogram(bins = 60,
+                 col = "white",
+                 fill = "#9099A2"
+                 ) +
+  theme_tufte() +
+  labs(
+    title = "Total sulfur dioxide log10"
+    ) +
+  labs(
+    x = "g/dm^3 log10",
+    y = "Count"
+    ) + scale_x_log10()
+
+plt17 <- ggplot(aes(x = red_wine$free.sulfur.dioxide), data = red_wine) +
+  geom_histogram(bins = 60,
+                 col = "white",
+                 fill = "#9099A2"
+                 ) +
+  theme_tufte() +
+  labs(
+    title = "Free Sulfur Dioxide sqrt"
+    ) +
+  labs(
+    x = "g/dm^3 sqrt",
+    y = "Count"
+    ) + scale_x_sqrt()
+
+grid.arrange(plt14, plt15, plt16, plt17, ncol = 1)
+```
+
+Other over disperssed variables are explored in the above plot and each is
+matched to a data transformation that better represents 
+the distribution of data values. Chlorides shows a slightly normal distribution
+with a long tail to the right, it is centered nicely after a 
+log10 transformation.
+
+Citric acid still has a large count of values at close to 0, the data
+distribution is best represented using a square root transformation, this
+does not bring the data closer to a normal distribution but represents
+the the distribution of values across the range.
+
+Total sulfur dioxide is transformed using log10 given a wide normal
+styled distribution.
+
+Free sulfure dioxide puts too many values to the right hand side during a
+log10 transformation so even with a skew, square root gives a better
+distribution of values.
+
+Each of these transformations can be used when comparing these variables
+to other variables.
+
 # Univariate Analysis
 
 > **Tip**: Now that you've completed your univariate explorations, it's time to
@@ -313,6 +422,10 @@ as well.
 
 ```{r echo=FALSE, Bivariate_Plots}
 
+```
+
+```{r echo=FALSE, biv_hist, fig.height = 2, fig.width = 4, fig.align="center"}
+sm.density.compare(red_wine$alcohol, red_wine$quality_c)
 ```
 
 ```{r echo=FALSE, Bivariate_Plots_pH}
