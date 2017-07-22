@@ -71,3 +71,5 @@ Resources
 `QQ norm confidence intervals <https://rdrr.io/cran/extRemes/man/qqnorm.html>`_
 
 'How to modify colors on ggplot <https://stackoverflow.com/questions/5171263/changing-line-colors-with-ggplot>`_
+
+`Smoothed conditional means <http://ggplot2.tidyverse.org/reference/geom_smooth.html>`_
