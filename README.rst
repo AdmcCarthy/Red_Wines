@@ -73,3 +73,5 @@ Resources
 'How to modify colors on ggplot <https://stackoverflow.com/questions/5171263/changing-line-colors-with-ggplot>`_
 
 `Smoothed conditional means <http://ggplot2.tidyverse.org/reference/geom_smooth.html>`_
+
+`Modify axis labels to show all values <https://stackoverflow.com/questions/11335836/increase-number-of-axis-ticks>`_
