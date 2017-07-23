@@ -9,6 +9,7 @@ library(scales)
 library(extRemes)
 library(sm)
 library(gridExtra)
+library(GGally)
 ```
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Load_the_Data}
@@ -394,71 +395,347 @@ to other variables.
 
 # Univariate Analysis
 
-> **Tip**: Now that you've completed your univariate explorations, it's time to
-reflect on and summarize what you've found. Use the questions below to help you
-gather your observations and add your own if you have other thoughts!
-
 ### What is the structure of your dataset?
+The dataset is in a tidy format. Each observation corresponds to a series
+of variables.
+
+The dataset consists of one key dependent variable, quality. This is based on
+the subjective sensory assesment of experts. This should result in a value
+between 0-10, within this dataset the majority of the samples exist with
+results of 5 or 6.
+
+The other eleven variables are all measurements. It is assumed that these
+are indpendent, although there may be relationships between some of these
+evelen variables.
 
 ### What is/are the main feature(s) of interest in your dataset?
+The main feauture of interest is the dependent variable quality.
+
+Without further exploratory work it can not be assesed which of the
+11 measurement variables is the most important.
 
 ### What other features in the dataset do you think will help support your \
-investigation into your feature(s) of interest?
+At the moment all other features are of interest as this investigation is
+not applying any domain knowledge about what is most important.
 
 ### Did you create any new variables from existing variables in the dataset?
+One categorical variable is created based on the dependent quality variable.
+This splits quality into two categories, upper and lower. The purpose of this
+is to represent better (upper) and worse (lower) wines. This is split in two
+due to the limited distribution of values outside of 5 and 6. The idea is to
+use this new variable to see if there are any relationships in other variables
+that seperate better or worse wines.
 
-### Of the features you investigated, were there any unusual distributions? \
-Did you perform any operations on the data to tidy, adjust, or change the form \
-of the data? If so, why did you do this?
+### Of the features you investigated, were there any unusual distributions?
+There appear to be no normal distributions in this dataset, two are close
+but the qq plots have shown they sit outside of an idealised normal
+distribution.
+
+Rounding of inputs appears to cause minor clustering within the datasets,
+this may relate to the tool precision used to assess the physiochemical
+properties of each wine.
+
+Citric acid has a large number of values close to zero, this should be
+further investigated to see if this is a data quality issue or true signal.
+
+Variables can depict over disperssed distributions with long tails to the right
+, using either square root or log10 transformations can help better
+represent the distribtion of these values. Each of these as been investigated
+to identify which transformation should be applied for future plots.
 
 
 # Bivariate Plots Section
 
-> **Tip**: Based on what you saw in the univariate plots, what relationships
-between variables might be interesting to look at in this section? Don't limit
-yourself to relationships between a main output feature and one of the
-supporting variables. Try to look at relationships between supporting variables
-as well.
+This section will begin with assesing if there any variables with a strong
+difference between upper and lower wine quality reviews.
 
-```{r echo=FALSE, Bivariate_Plots}
+This section will also check if any of the measurement variables are related.
 
-```
-
-```{r echo=FALSE, biv_hist, fig.height = 2, fig.width = 4, fig.align="center"}
-sm.density.compare(red_wine$alcohol, red_wine$quality_c)
-```
-
-```{r echo=FALSE, Bivariate_Plots_pH}
-ggplot(data=red_wine, aes(red_wine$pH)) + 
-  geom_histogram(bins=50, 
-                 col="white", 
-                 fill="#9099A2"
-                 ) +
+```{r echo=FALSE, Bivariate_Plots, fig.height = 2, fig.width = 4, fig.align="center"}
+freq_poly <-  function(x_v, name, scale, 
+                       dataset=red_wine, group=red_wine$quality_c) {
+plt <- qplot(x = x_v, data = dataset,
+             geom = 'freqpoly', 
+             color = group,
+             bins = 25) +
+  scale_x_continuous() +
   theme_tufte() +
   labs(
-    title="Histogram for pH"
+    title = name
     ) +
   labs(
-    x="pH", 
-    y="Count"
-    ) +
-  facet_wrap(~quality_c, ncol = 1)
+    x = scale
+      )
+plt + scale_color_manual(values=c('#0B3C5D', '#D9B310'))
+}
+
+freq_poly(red_wine$alcohol, "Alcohol frequency polygon", "g/dm^3")
 ```
 
-# Bivariate Analysis
+Frequency polygons showing the distribution of values but now split
+by groups of the dependent variable quality can help show if there
+are trends in any of the variables and the output variables.
 
-> **Tip**: As before, summarize what you found in your bivariate explorations
-here. Use the questions below to guide your discussion.
+In the above figure alcohol shows a large count of wines with lower
+quality measurements are associated to lower alcohol values.
+
+```{r echo=FALSE, freq_poly_mulit, fig.height = 6, fig.width = 9, message=FALSE, warning=FALSE,}
+# Use function to create a range of plots
+plt19 <- freq_poly(red_wine$fixed.acidity, "Fixed Acidity", "g/dm^3")
+plt20 <- freq_poly(red_wine$volatile.acidity, "Volatile Acidity", "g/dm^3")
+plt21 <- freq_poly(red_wine$citric.acid, "Citric Acidity", "g/dm^3 sqrt")
+plt21 <- plt21 + scale_x_sqrt()
+
+plt22 <- freq_poly(red_wine$residual.sugar, "Residual Sugar", "g/dm^3 log10")
+plt22 <- plt22 + scale_x_log10()
+
+plt23 <- freq_poly(red_wine$chlorides, "Chlorides", "g/dm^3 log10")
+plt23 <- plt23 + scale_x_log10()
+
+plt24 <- freq_poly(red_wine$pH, "pH", "pH scale")
+plt25 <- freq_poly(red_wine$free.sulfur.dioxide, 
+  "Free Sulphar Dioxide", "mg/dm^3 sqrt")
+plt25 <- plt25 + scale_x_sqrt()
+
+plt26 <- freq_poly(red_wine$total.sulfur.dioxide, 
+  "Total Sulphar Dioxide", "mg/dm^3 log10")
+plt26 <- plt26 + scale_x_log10()
+
+plt27 <- freq_poly(red_wine$density, 
+  "Density", "g/dm^3")
+
+multiplot(plt19, plt20, plt21, plt22, plt23, 
+          plt24, plt25, plt26, plt27, cols = 3)
+```
+
+By plotting the remaining variables in a similar way it is possible to
+quickly identify any variables that appear to have some relationship
+to the upper or lower quality. The first observation is that many of the
+variables show little difference between the frequency polygons for upper or
+for lower. Those that do show a some difference, but it does not appear to
+be large or very obvious.
+
+Volatile acidity shows a distribution centered to the left for upper. The
+frequency polygon shows lower values for upper than the lower category.
+
+Total sulfar dioxide has none of it´s upper values in the upper group.
+
+Both free sulfar dioxide and total sulfar dioxide show some two peaks for
+the upper group (this may relate to count as this is not a density plot).
+
+Citric acid has a spike in it´s higher values for the upper group.
+
+These issues will be worth investigating further.
+
+```{r echo=FALSE, freq_pair_plot, fig.height = 9, fig.width = 9, message=FALSE, warning=FALSE,}
+ggpairs(red_wine,
+        title = "Red Wine Pair Plot"
+        ) +
+  theme_minimal()
+```
+
+The pair plot gives all combinations of bivariate analysis. It´s main
+limitation is that it is not created using the data transformations
+previously identified. This acts as a usefull way to look up
+pairs of values to investigate further.
+
+As previously addressed by the bivariate frequency polygon plot very
+few of the datasets impact the upper and lower categories of quality
+significantly apart from alcohol. This can be viewed in the box plots and
+paired histograms. Alcohol has a 0.48 correlation to quality on this plot.
+Volatile acidity has a negative 0.39 and sulphates has 0.25. These are
+variables with the highest correlation to the quality variable.
+
+Free sulphar and total sulphar have a correlation of 0.67 but the two
+variables have little correlation to other variables.
+
+Density appears to have some weak correlation with a few variables like
+residual sugar and fixed acidity. This could be a candidate for
+multi-variate analysis.
+
+Chlorides and residual sugars should be checked as these are both highly
+dispersed variables so it is difficult to see any correlation in this pair
+plot.
+
+```{r echo=FALSE, scatter_sulf, fig.height = 5, fig.width = 5}
+ggplot(aes(x = red_wine$total.sulfur.dioxide, y = red_wine$free.sulfur.dioxide),
+       data = red_wine) +
+  geom_point(alpha = 0.2,
+             position = position_jitter(),
+             color = '#192231') +
+  coord_trans(x = 'log10', y = 'log10') +
+  theme_tufte() +
+  labs(
+    title = "Total vs Residual Sulfar Dioxide",
+    x = "Total mg/dm^3 log10",
+    y = "Residual mg/dm^3 log10"
+    ) +
+  geom_smooth(formula = log(y)~log(x),
+              colour = '#192231')
+```
+
+Total vs. residual sulfar dioxide is plotted with both variables on a log10
+scale to highlight the correlation between the two variables. There are a
+handfull of outliers but this appears to show a relationship.
+
+```{r echo=FALSE, scatter_den, fig.height = 5, fig.width = 5}
+ggplot(aes(x = red_wine$density, y = red_wine$fixed.acidity),
+       data = red_wine) +
+  geom_point(alpha = 0.2,
+             position = position_jitter(),
+             color = '#192231') +
+  theme_tufte() +
+  labs(
+    title = "Density vs Fixed Acidity",
+    x = "Density g/dm^3",
+    y = "Fixed acidity mg/dm^3"
+    ) +
+  geom_smooth(method = 'lm', formula = y~x,
+              colour = '#192231')
+```
+
+Density plotted against fixed acidity shows a relationship between the two
+variables. This has been fitted with a linear model.
+
+```{r echo=FALSE, scatter_c_r, fig.height = 5, fig.width = 5}
+ggplot(aes(x = red_wine$chlorides, y = red_wine$residual.sugar),
+       data = red_wine) +
+  geom_point(alpha = 0.2,
+             position = position_jitter(),
+             color = '#192231') +
+  coord_trans(x = 'log10', y = 'log10') +
+  theme_tufte() +
+  labs(
+    title = "Chlorides vs Residual Sugar",
+    x = "Chlorides g/dm^3 log10",
+    y = "Residual sugar g/dm^3 log10"
+    )
+```
+
+Chlorides and residual sugar are compared with a log10 transform but there
+still appears to limited correlation between these two variables.
+
+```{r echo=FALSE, scatter_acid, fig.height = 5, fig.width = 5}
+ggplot(aes(x = red_wine$volatile.acidity, y = red_wine$fixed.acidity),
+       data = red_wine) +
+  geom_point(alpha = 0.2,
+             position = position_jitter(),
+             color = '#192231') +
+  theme_tufte() +
+  labs(
+    title = "Volatile vs Fixed Acidity",
+    x = "Volatile acidity g/dm^3",
+    y = "Fixed acidity mg/dm^3"
+    ) +
+  geom_smooth(method = 'lm', formula = y~x,
+              colour = '#192231')
+```
+
+The fixed compared to volatile acidity shows a weak correlation.
+
+```{r echo=FALSE, scatter_q_v, fig.height = 5, fig.width = 5}
+ggplot(aes(x = red_wine$sulphates, y = red_wine$quality),
+       data = red_wine) +
+  geom_point(alpha = 0.3,
+             position = position_jitter(),
+             color = '#192231') +
+  theme_tufte() +
+  labs(
+    title = "Sulphates vs Quality",
+    x = "Sulphates g/dm^3",
+    y = "Quality score"
+    )
+```
+
+Comparing sulphates to quality values there intitially appears to be a
+correlated. In the following series of plots category 5 and 6 are always key
+as they have a much higher proportion of values. Category 5 and 6 have a wider
+distribution of values of than the other categories. Despite the apparent
+trend between high quality and low quality values this may not be signal given
+the low number of samples in the highest and lowest values. Still there is a
+complete difference between categories 3 sulphate values and category 8
+sulphate values.
+
+Linear models are not used in these plots as they will always be swayed by
+the high number of values within quality values 5 and 6.
+
+```{r echo=FALSE, scatter_q_v, fig.height = 5, fig.width = 5}
+ggplot(aes(x = red_wine$volatile.acidity, y = red_wine$quality),
+       data = red_wine) +
+  geom_point(alpha = 0.3,
+             position = position_jitter(),
+             color = '#192231') +
+  theme_tufte() +
+  labs(
+    title = "Volatility Acidity vs Quality",
+    x = "Volatile acidity g/dm^3",
+    y = "Quality score"
+    )
+```
+
+Comparing the dependent variable, quality, to variables
+that have a correlation to it starts with volatile acidity.
+The plot shows each category of quality on the y axis and then a
+scatter of plots showing the distribution of volatile acidity. There is a weak
+correlation but what is more interesting is which values do not occur in
+certain classes. For example there are no values above 0.9 for the top
+scored wines. For both the high and low quality scores the challenge is
+in the low sample of variables.
+
+```{r echo=FALSE, scatter_q_a, fig.height = 5, fig.width = 5}
+ggplot(aes(x = red_wine$alcohol, y = red_wine$quality),
+       data = red_wine) +
+  geom_point(alpha = 0.3,
+             position = position_jitter(),
+             color = '#192231') +
+  theme_tufte() +
+  labs(
+    title = "Alcohol vs Quality",
+    x = "Alcohol %",
+    y = "Quality score"
+    )
+```
+
+Alcohol compared to quality shows a positive correlation. The values
+are dominatly within the 6 and 5 scores. Lowest scoring wines often have
+lower alcohol values. While the highest scores tend towards the higher values.
+A key observation is cateogry six which shows a range of values across the
+alcohol values. This puts into question the strength of this correlation
+that higher alcohol equals higher quality of wine.
+
+# Bivariate Analysis
 
 ### Talk about some of the relationships you observed in this part of the \
 investigation. How did the feature(s) of interest vary with other features in \
 the dataset?
 
+Overall there are few strong correlations between variables in this dataset.
+The most promising line of investigation seems to be alcohol and it´s
+relationship to quality.
+
+Two other variables (Volatile acidity and sulphates) have a weak relationship
+to the feature of interest.
+
 ### Did you observe any interesting relationships between the other features \
 (not the main feature(s) of interest)?
 
+Few strong relationships exist, density appears to have associations to
+multiple variables and can be investigated further through multivariate
+analysis.
+
+A number of plots have outliers, it would be interesting to know if there
+are clusters within the dataset or any other types of structures that can
+not be observed through bivariate analysis.
+
 ### What was the strongest relationship you found?
 
+Total and free sulfar dioxide have the strongest relationship found,
+this would make sense as it is likely free sulfar dioxide has
+a proportional relationship to the total amount of sulfar
+dioxide in a sample.
+
+Density to fixed acidity has the same correlation value in the pair plot
+as total and free sulfar dioxide. 
 
 # Multivariate Plots Section
 
@@ -470,7 +747,49 @@ you plan on creating any mathematical models, this is the section where you
 will do that.
 
 ```{r echo=FALSE, Multivariate_Plots}
+ggplot(aes(x = red_wine$density, y = red_wine$fixed.acidity),
+       data = red_wine) +
+  geom_point(alpha = 0.2,
+             position = position_jitter(),
+             color = red_wine$alcohol) +
+  theme_tufte() +
+  labs(
+    title = "Densiy vs Fixed Acidity with Alcohol",
+    x = "Density g/dm^3 log10",
+    y = "Fixed Acidity g/dm^3"
+    )
+```
 
+The
+
+```{r echo=FALSE, Multivariate_Plots_2}
+ggplot(aes(x = red_wine$alcohol, y = red_wine$quality_c),
+       data = red_wine) +
+  geom_point(alpha = 0.8,
+             position = position_jitter(),
+             color = red_wine$quality) +
+  theme_tufte() +
+  labs(
+    title = "Densiy vs Residual Sugar with Alcohol",
+    x = "Alcohol %",
+    y = "Residual sugar g/dm^3 log10"
+    )
+```
+
+The plot
+
+```{r echo=FALSE, Multivariate_Plots_3}
+ggplot(aes(x = red_wine$alcohol, y = red_wine$volatile.acidity),
+       data = red_wine) +
+  geom_point(alpha = 0.8,
+             position = position_jitter(),
+             color = red_wine$quality) +
+  theme_tufte() +
+  labs(
+    title = "Densiy vs Residual Sugar with Alcohol",
+    x = "Alcohol %",
+    y = "Residual sugar g/dm^3 log10"
+    )
 ```
 
 # Multivariate Analysis
@@ -531,12 +850,11 @@ future work that could be done with the dataset.
 > **Tip**: Don't forget to remove this, and the other **Tip** sections before
 saving your final work and knitting the final report!
 
-# Resources used
+## Dataset from:
 P. Cortez, A. Cerdeira, F. Almeida, T. Matos and J. Reis. 
 Modeling wine preferences by data mining from physicochemical properties.
 In Decision Support Systems, Elsevier, 47(4):547-553. ISSN: 0167-9236.
-Available at: [@Elsevier](http://dx.doi.org/10.1016/j.dss.2009.05.016)
-                [Pre-press (pdf)](http://www3.dsi.uminho.pt/pcortez/winequality09.pdf)
-              [bib](http://www3.dsi.uminho.pt/pcortez/dss09.bib)
-                
-[ggthemes](https://cran.r-project.org/web/packages/ggthemes/vignettes/ggthemes.html)
+Available at: 
+[@Elsevier](http://dx.doi.org/10.1016/j.dss.2009.05.016)
+[Pre-press (pdf)](http://www3.dsi.uminho.pt/pcortez/winequality09.pdf)
+[bib](http://www3.dsi.uminho.pt/pcortez/dss09.bib)
