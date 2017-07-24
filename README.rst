@@ -11,7 +11,10 @@ A brief exploratory data anlysis of a selection of Portugese red wines.
 Attempt to delve into physio-chemical measurements to find if there
 are any properties that discriminate between good and bad wine.
 
-See `report<>`_ for details.
+Getting started
+---------------
+
+See `report<https://admccarthy.github.io/Red_Wines/>`_ for the full EDA analysis.
 
 .. image:: resources\images\Final_img.png
 
