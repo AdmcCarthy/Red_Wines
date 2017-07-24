@@ -14,10 +14,10 @@ library(GGally)
 ```
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Load_the_Data}
+setwd('..')
 setwd('./data')
 # Load the Data
 red_wine <- read.csv('wineQualityReds.csv')
-setwd('..')
 ```
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Process_the_Data}
