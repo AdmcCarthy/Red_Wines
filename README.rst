@@ -14,7 +14,6 @@ are any properties that discriminate between good and bad wine.
 See `report<>`_ for details.
 
 .. image:: resources\images\Final_img.png
-   :scale: 100 %
 
 Dataset
 -------
@@ -75,7 +74,7 @@ Resources
 
 `QQ norm confidence intervals <https://rdrr.io/cran/extRemes/man/qqnorm.html>`_
 
-'How to modify colors on ggplot <https://stackoverflow.com/questions/5171263/changing-line-colors-with-ggplot>`_
+`How to modify colors on ggplot <https://stackoverflow.com/questions/5171263/changing-line-colors-with-ggplot>`_
 
 `Smoothed conditional means <http://ggplot2.tidyverse.org/reference/geom_smooth.html>`_
 
