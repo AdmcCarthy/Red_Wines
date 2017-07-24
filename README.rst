@@ -2,10 +2,19 @@
 Red Wines
 =========
 
-An investigation into red wine data
+*Exploratory data analysis into red wine data*
 
 Overview
 --------
+
+A brief exploratory data anlysis of a selection of Portugese red wines.
+Attempt to delve into physio-chemical measurements to find if there
+are any properties that discriminate between good and bad wine.
+
+See `report<>`_ for details.
+
+.. image:: resources\images\Final_img.png
+   :scale: 100 %
 
 Dataset
 -------
@@ -15,10 +24,6 @@ Red wine data is originally provided by:
   P. Cortez, A. Cerdeira, F. Almeida, T. Matos and J. Reis. 
   Modeling wine preferences by data mining from physicochemical properties.
   In Decision Support Systems, Elsevier, 47(4):547-553. ISSN: 0167-9236.
-
-  Available at: [@Elsevier] http://dx.doi.org/10.1016/j.dss.2009.05.016
-                [Pre-press (pdf)] http://www3.dsi.uminho.pt/pcortez/winequality09.pdf
-                [bib] http://www3.dsi.uminho.pt/pcortez/dss09.bib
 
 See this `file <https://s3.amazonaws.com/udacity-hosted-downloads/ud651/wineQualityInfo.txt>`_ 
 for dataset information
