@@ -14,7 +14,7 @@ are any properties that discriminate between good and bad wine.
 Getting started
 ---------------
 
-See `report<https://admccarthy.github.io/Red_Wines/>`_ for the full EDA analysis.
+See `report <https://admccarthy.github.io/Red_Wines/>`_ for the full EDA analysis.
 
 .. image:: resources\images\Final_img.png
 
