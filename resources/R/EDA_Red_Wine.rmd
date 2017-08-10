@@ -22,10 +22,13 @@ red_wine <- read.csv('wineQualityReds.csv')
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, Process_the_Data}
 # Create a new categorical variable for quality
-red_wine['quality_c'] <- ifelse(red_wine$quality <= 5, "lower", "upper")
+red_wine['upper_vs_lower'] <- ifelse(red_wine$quality <= 5, "lower", "upper")
 
 # Assign categorical groups as levels
-red_wine$quality_c <- factor(red_wine$quality_c)
+red_wine$upper_vs_lower <- factor(red_wine$upper_vs_lower)
+
+# Remove X as this is the same as index
+red_wine$X <- NULL
 ```
 
 Red wine data-set consisting of 1599 variants of the Portuguese 
@@ -61,7 +64,7 @@ measurements.
  Output variable (based on sensory data):
  
  * 12 - quality (score between 0 and 10)
- * 13 - quality_c (quality grouped into lower and upper)
+ * 13 - upper_vs_lower (quality grouped into lower and upper)
 
               **Descriptive Statistics of Variables**
 ```{r echo=FALSE, Univariate_Plots}
@@ -88,15 +91,15 @@ The other variables are all numeric data types.
 There are no missing values within the data-set.
 
 ```{r echo=FALSE, U, fig.height = 3, fig.width = 9, fig.align="center"}
-ggplot(data=red_wine, aes(red_wine$quality)) + 
-  geom_bar(fill="#9099A2") +
+ggplot(data = red_wine, aes(red_wine$quality)) + 
+  geom_bar(fill = "#9099A2") +
   theme_tufte() +
   labs(
-    title="Distribution of Quality"
+    title = "Distribution of Quality"
     ) +
   labs(
-    x="Quality",
-    y="Count"
+    x = "Quality",
+    y = "Count"
     ) +
   scale_x_continuous(breaks = round(seq(min(red_wine$quality),
                                         max(red_wine$quality), by = 1),1))
@@ -166,7 +169,7 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
                     ncol = cols, nrow = ceiling(numPlots/cols))
   }
 
- if (numPlots==1) {
+ if (numPlots == 1) {
     print(plots[[1]])
 
   } else {
@@ -232,7 +235,10 @@ hist(red_wine$sulphates,
      col.axis = '#9099A2',
      col.lab = '#9099A2',
      col.main = '#192231',
-     bty = 'n')
+     bty = 'n',
+     xlab = "Sulphates g/dm^3",
+     ylab = "Density"
+     )
 lines(density(red_wine$sulphates),
       col = '#192231', lwd = 2)
 lines(density(red_wine$sulphates, adjust = 2), 
@@ -477,7 +483,7 @@ This section will also check if any of the measurement variables are related.
 
 ```{r echo=FALSE, BPlots, fig.height = 2, fig.width = 4, fig.align="center"}
 freq_poly <-  function(x_v, name, scale, 
-                       dataset=red_wine, group=red_wine$quality_c) {
+                       dataset=red_wine, group=red_wine$upper_vs_lower) {
 plt <- qplot(x = x_v, data = dataset,
              geom = 'freqpoly', 
              color = group,
@@ -490,7 +496,7 @@ plt <- qplot(x = x_v, data = dataset,
   labs(
     x = scale
       )
-plt + scale_color_manual(values=c('#0B3C5D', '#D9B310'))
+plt + scale_color_manual(values = c('#0B3C5D', '#D9B310'))
 }
 
 freq_poly(red_wine$alcohol, "Alcohol frequency polygon", "g/dm^3")
@@ -724,9 +730,12 @@ ggplot(aes(x = red_wine$citric.acid, y = red_wine$fixed.acidity),
 Citric vs fixed acidity shows a positive relationship.
 
 ```{r echo=FALSE, scatter_q_v, fig.height = 5, fig.width = 5}
-ggplot(aes(x = red_wine$sulphates, y = red_wine$quality),
+ggplot(aes(y = red_wine$sulphates, x = factor(red_wine$quality)),
        data = red_wine) +
-  geom_point(alpha = 0.3,
+  geom_boxplot(outlier.colour = "transparent",
+               color = "#9099A2") +
+  coord_flip() +
+  geom_jitter(alpha = 0.3,
              position = position_jitter(),
              color = '#192231') +
   theme_tufte() +
@@ -752,9 +761,12 @@ Linear models are not used in these plots as they will always be swayed by
 the high number of values within quality values 5 and 6.
 
 ```{r echo=FALSE, scatter_q_v2, fig.height = 5, fig.width = 5}
-ggplot(aes(x = red_wine$volatile.acidity, y = red_wine$quality),
+ggplot(aes(y = red_wine$volatile.acidity, x = factor(red_wine$quality)),
        data = red_wine) +
-  geom_point(alpha = 0.3,
+  geom_boxplot(outlier.colour = "transparent",
+               color = "#9099A2") +
+  coord_flip() +
+  geom_jitter(alpha = 0.3,
              position = position_jitter(),
              color = '#192231') +
   theme_tufte() +
@@ -777,9 +789,12 @@ scored wines. For both the high and low quality scores the challenge is
 in the low sample of variables.
 
 ```{r echo=FALSE, scatter_q_a, fig.height = 5, fig.width = 5}
-finplt1 <-  ggplot(aes(x = red_wine$alcohol, y = red_wine$quality),
+finplt1 <-  ggplot(aes(y = red_wine$alcohol, x = factor(red_wine$quality)),
                        data = red_wine) +
-  geom_point(alpha = 0.3,
+  geom_boxplot(outlier.colour = "transparent",
+               color = "#9099A2") +
+  coord_flip() +
+  geom_jitter(alpha = 0.3,
              position = position_jitter(),
              color = '#192231') +
   theme_tufte() +
@@ -802,8 +817,8 @@ that higher alcohol equals higher quality of wine.
 
 ```{r echo=FALSE, qq2, fig.height = 8, fig.width = 8}
 fnl_2 <- function() {
-  qqplot((red_wine[red_wine$quality_c == "upper", ]$alcohol),
-  (red_wine[red_wine$quality_c == "lower", ]$alcohol), 
+  qqplot((red_wine[red_wine$upper_vs_lower == "upper", ]$alcohol),
+  (red_wine[red_wine$upper_vs_lower == "lower", ]$alcohol), 
   pch = 1, 
   xlab = "Alcohol Upper Quality Quantiles", 
   ylab = "Alcohol Lower Quality Quantiles", 
@@ -882,61 +897,62 @@ plt_mv4 <- ggplot(aes(x = (red_wine$density/red_wine$fixed.acidity),
                          red_wine$free.sulfur.dioxide)
                   ),
        data = red_wine) +
-  geom_point(aes(color = factor(red_wine$quality), 
-                 shape = factor(red_wine$quality)),
+  geom_point(aes(color = factor(red_wine$quality)),
              alpha = 0.5,
              position = position_jitter()
              ) +
     theme_minimal() +
   labs(
-    x = "Density/Fixed acidity",
-    y = "Total/Free sulfur dioxide"
-    )
+    x = "Density g/dm^3/Fixed acidity g/dm^3",
+    y = "Total/Free sulfur dioxide mg/dm^3"
+    ) +
+  labs(color = 'Quality') 
+plt_mv4 <- plt_mv4 + scale_colour_brewer(palette = "RdBu")
 
 plt_mv5 <- ggplot(aes(x = (red_wine$density/red_wine$fixed.acidity),
                   y = log10(red_wine$sulphates/red_wine$volatile.acidity)),
        data = red_wine) +
-  geom_point(aes(color = factor(red_wine$quality), 
-                 shape = factor(red_wine$quality)),
+  geom_point(aes(color = factor(red_wine$quality)),
              alpha = 0.5,
              show.legend = FALSE,
              position = position_jitter()
              ) +
     theme_minimal() +
   labs(
-    x = "Density/Fixed Acidity",
-    y = "Sulphates/Volatile Acidity log10"
+    x = "Density g/dm^3/Fixed Acidity g/dm^3",
+    y = "Sulphates g/dm^3/Volatile Acidity g/dm^3 to log10"
     )
+plt_mv5 <- plt_mv5 + scale_colour_brewer(palette = "RdBu")
 
 plt_mv6 <- ggplot(aes(x = (red_wine$density/red_wine$alcohol),
                   y = log10(red_wine$sulphates/red_wine$volatile.acidity)),
        data = red_wine) +
-  geom_point(aes(color = factor(quality), 
-                 shape = factor(quality)),
+  geom_point(aes(color = factor(quality)),
              alpha = 0.5,
              show.legend = FALSE,
              position = position_jitter()
              ) +
     theme_minimal() +
   labs(
-    x = "Density/Alcohol",
-    y = "Sulphates/Volatile Acidity log10"
+    x = "Density g/dm^3/Alcohol g/dm^3",
+    y = "Sulphates g/dm^3/Volatile Acidity g/dm^3 to log10"
     )
+plt_mv6 <- plt_mv6 + scale_colour_brewer(palette = "RdBu")
 
 plt_mv7 <- ggplot(aes(x = (red_wine$pH/red_wine$alcohol),
                   y = log10(red_wine$sulphates/red_wine$chlorides)),
        data = red_wine) +
-  geom_point(aes(color = factor(quality), 
-                 shape = factor(quality)),
+  geom_point(aes(color = factor(quality)),
              alpha = 0.5,
              show.legend = FALSE,
              position = position_jitter()
              ) +
     theme_minimal() +
   labs(
-    x = "pH/Alcohol",
-    y = "Sulphates/Chlorides log10"
+    x = "pH/Alcohol %",
+    y = "Sulphates g/dm^3/Chlorides g/dm^3 to log10"
     )
+plt_mv7 <- plt_mv7 + scale_colour_brewer(palette = "RdBu")
 
 fnlplt_3 <- multiplot(plt_mv4, plt_mv5, plt_mv6, plt_mv7, cols = 1)
 fnlplt_3
@@ -947,10 +963,6 @@ to explore as ratios. Ratios allow for combining two variables with a
 relationship. This can allow for more multivariate exploration, each plot
 will combine two pairs of variables to try and see if the quality of wine
 stands out in some sort of pattern or relationship.
-
-The plot is double encoded for each quality category with both a colour
-and a different symbol, this helps emphasize the rarer values of 3, 4, 7 and
-8 which can be obscured when only using colour.
 
 The upper right plot uses the relationship between total and free sulfur
 dioxide and the relationship between density and fixed acidity. Overall
@@ -987,14 +999,15 @@ plt_mv7 <- ggplot(aes(x = (red_wine$density/red_wine$alcohol),
   theme_tufte() +
   labs(
     title = "Attempting to seperate upper from lower quality wines",
-    x = "Density/Alcohol",
-    y = "Sulphates/Volatile Acidity log10"
+    x = "Density g/dm^3/Alcohol %",
+    y = "Sulphates g/dm^3/Volatile Acidity g/dm^3 to log10"
     )
 fnl_plt_4 <- plt_mv7 + geom_point(aes(size = quality), 
                                   pch = 21, 
                                   show.legend = T,
                                   alpha = 0.5) + 
-  aes(fill = factor(quality_c))
+  aes(fill = factor(upper_vs_lower)) +
+  labs(fill='Upper vs Lower Quality') 
 fnl_plt_4
 ```
 
@@ -1008,7 +1021,7 @@ separate some of the lower and upper quality wines. It also shows there
 is significant overlap.
 
 ```{r echo=FALSE, Multivariate_Plots_8, fig.height = 6, fig.width = 9}
-plt_mv8 <- ggplot(aes(x = (red_wine$density/red_wine$alcohol),
+plt_mv8 <- ggplot(aes(x = (red_wine$alcohol),
                   y = log10(red_wine$sulphates/red_wine$volatile.acidity)),
        data = red_wine) +
   geom_point(alpha = 0.1,
@@ -1017,24 +1030,22 @@ plt_mv8 <- ggplot(aes(x = (red_wine$density/red_wine$alcohol),
   theme_minimal() +
   labs(
     title = "Comparing ratios of key variables",
-    x = "Density/Alcohol",
-    y = "Sulphates/Volatile Acidity log10"
+    x = "Alcohol %",
+    y = "Sulphates g/dm^3/Volatile Acidity g/dm^3 to log10"
     )
 plt_mv8 <- plt_mv8  + facet_wrap(~ factor(red_wine$quality))
-plt_mv8 <- plt_mv8 + geom_point(aes(size = (fixed.acidity/citric.acid)), 
+plt_mv8 <- plt_mv8 + geom_point(
+                     size = 2, 
                      pch = 21,
                      show.legend = T) + 
-  aes(fill = factor(quality), alpha = 0.2)
+  aes(fill = factor(quality), alpha = 0.2) +
+  labs(fill='Quality') 
 plt_mv8
 ```
 
-The last plot uses a bubble chart separated by each factor of quality. The
-axis are based on the same pairs of ratios as previously used to highlight
-differences between upper and lower quality wines.
-
-The ratio of fixed acidity to citric acid 
-controls the size but shows no immediate patterns within this
-plot, other than some lower values in quality values 3, 4 and 8.
+The last plot uses a chart separated by each factor of quality. The
+axis are based on the same pair of ratios as previously used to highlight
+differences between upper and lower quality wines against alcohol.
 
 The main purpose of this plot is to again show the challenges of the number
 of samples outside of values 5 and 6. Having a more even sample of values
@@ -1165,6 +1176,30 @@ The other key issue was the low sample rate of quality outside of 5 and 6.
 This data-set is a good case where gathering a broader sample of observations
 should be prioritized before committing time to other methodologies
 like machine learning.
+
+The main proposal for further work would be to focus on getting a more
+even representation of data for all labels. There is a similar dataset
+for white wine which could be compared to see if there are any
+similar relationships between this trend. This is still a limited sample
+as we are looking at only one region of wine.
+
+Principal component analysis could be used to reduce the dimensionality of the
+dataset and explore if this relates to qualiy.
+
+The quality measure itself could also be verified as an experts opinion on wine
+may be subjective. Perhaps collecting each individual reviewers score for
+each sample will shed further insight.
+
+After exploring further an experiment would be to make a
+hypothesis and what
+controls wine quality, and then test this on new larger datasets. 
+If this includes
+attributes that can be controlled for during production of wine this may aid
+in wine producers producing better quality wine.
+
+For example are there a typical 
+range of alcohol values that are preferred by wine
+experts and customers.
 
 ## Dataset from:
 P. Cortez, A. Cerdeira, F. Almeida, T. Matos and J. Reis. 
