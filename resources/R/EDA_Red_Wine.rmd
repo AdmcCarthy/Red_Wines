@@ -41,7 +41,8 @@ The details are described in [Cortez et al., 2009].
 > **Overview**: There are 13 variables within the original data-set. 
 Of these one is a
 dependent variable giving a subjective measure of quality based on experts
-sensory review of the wine. The main 11 variables are independent physio-chemical
+sensory review of the wine. The main 11 variables are independent 
+physio-chemical
 tests. These may be inter-related but are initially thought of as individual
 measurements.
   
@@ -598,6 +599,15 @@ Chlorides and residual sugars should be checked as these are both highly
 dispersed variables so it is difficult to see any correlation in this pair
 plot.
 
+An alternative way to view which variables are correlated is with a correlation
+matrix. This represents similar observations as above but the magnitude
+of the colour highlights strong correlations.
+
+```{r echo=FALSE, correlation_matrix, fig.height = 5, fig.width = 5, message=FALSE, warning=FALSE}
+ggcorr(red_wine)  +
+  theme_tufte()
+```
+
 ```{r echo=FALSE, scatter_sulf, fig.height = 5, fig.width = 5}
 ggplot(aes(x = red_wine$total.sulfur.dioxide, y = red_wine$free.sulfur.dioxide),
        data = red_wine) +
@@ -741,8 +751,8 @@ ggplot(aes(y = red_wine$sulphates, x = factor(red_wine$quality)),
   theme_tufte() +
   labs(
     title = "Sulphates vs Quality",
-    x = "Sulphates g/dm^3",
-    y = "Quality score"
+    y = "Sulphates g/dm^3",
+    x = "Quality score"
     ) + 
   scale_y_continuous(breaks = round(seq(min(red_wine$quality),
                                         max(red_wine$quality), by = 1),1))
@@ -772,8 +782,8 @@ ggplot(aes(y = red_wine$volatile.acidity, x = factor(red_wine$quality)),
   theme_tufte() +
   labs(
     title = "Volatility Acidity vs Quality",
-    x = "Volatile acidity g/dm^3",
-    y = "Quality score"
+    y = "Volatile acidity g/dm^3",
+    x = "Quality score"
     )  + 
   scale_y_continuous(breaks = round(seq(min(red_wine$quality),
                                         max(red_wine$quality), by = 1),1))
@@ -800,8 +810,8 @@ finplt1 <-  ggplot(aes(y = red_wine$alcohol, x = factor(red_wine$quality)),
   theme_tufte() +
   labs(
     title = "Alcohol vs Quality",
-    x = "Alcohol %",
-    y = "Quality score"
+    y = "Alcohol %",
+    x = "Quality score"
     ) + 
   scale_y_continuous(breaks = round(seq(min(red_wine$quality),
                                         max(red_wine$quality), by = 1),1))
@@ -891,7 +901,7 @@ By using the ratio of pairs of correlated independent variables more
 dimensions of the data-set can be viewed at the same time. These
 paired relationships are based on the bi-variate analysis.
 
-```{r echo=FALSE, Multivariate_Plots_3, fig.height = 20, fig.width = 6}
+```{r echo=FALSE, Multivariate_Plots_3, fig.height = 20, fig.width = 6, message=FALSE, warning=FALSE}
 plt_mv4 <- ggplot(aes(x = (red_wine$density/red_wine$fixed.acidity),
                   y = log10(red_wine$total.sulfur.dioxide /
                          red_wine$free.sulfur.dioxide)
@@ -954,8 +964,7 @@ plt_mv7 <- ggplot(aes(x = (red_wine$pH/red_wine$alcohol),
     )
 plt_mv7 <- plt_mv7 + scale_colour_brewer(palette = "RdBu")
 
-fnlplt_3 <- multiplot(plt_mv4, plt_mv5, plt_mv6, plt_mv7, cols = 1)
-fnlplt_3
+multiplot(plt_mv4, plt_mv5, plt_mv6, plt_mv7, cols = 1)
 ```
 
 Based on bi-variate exploration of variables a number of candidates exist
@@ -1007,7 +1016,7 @@ fnl_plt_4 <- plt_mv7 + geom_point(aes(size = quality),
                                   show.legend = T,
                                   alpha = 0.5) + 
   aes(fill = factor(upper_vs_lower)) +
-  labs(fill='Upper vs Lower Quality') 
+  labs(fill = 'Upper vs Lower Quality') 
 fnl_plt_4
 ```
 
@@ -1039,7 +1048,7 @@ plt_mv8 <- plt_mv8 + geom_point(
                      pch = 21,
                      show.legend = T) + 
   aes(fill = factor(quality), alpha = 0.2) +
-  labs(fill='Quality') 
+  labs(fill = 'Quality') 
 plt_mv8
 ```
 
