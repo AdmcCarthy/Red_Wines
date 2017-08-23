@@ -603,9 +603,8 @@ An alternative way to view which variables are correlated is with a correlation
 matrix. This represents similar observations as above but the magnitude
 of the colour highlights strong correlations.
 
-```{r echo=FALSE, scatter_sulf, fig.height = 5, fig.width = 5}
-ggcorr(red_wine,
-       title = "Red Wine Correlation Matrix")  +
+```{r echo=FALSE, correlation_matrix, fig.height = 5, fig.width = 5, message=FALSE, warning=FALSE}
+ggcorr(red_wine)  +
   theme_tufte()
 ```
 
@@ -902,7 +901,7 @@ By using the ratio of pairs of correlated independent variables more
 dimensions of the data-set can be viewed at the same time. These
 paired relationships are based on the bi-variate analysis.
 
-```{r echo=FALSE, Multivariate_Plots_3, fig.height = 20, fig.width = 6}
+```{r echo=FALSE, Multivariate_Plots_3, fig.height = 20, fig.width = 6, message=FALSE, warning=FALSE}
 plt_mv4 <- ggplot(aes(x = (red_wine$density/red_wine$fixed.acidity),
                   y = log10(red_wine$total.sulfur.dioxide /
                          red_wine$free.sulfur.dioxide)
@@ -965,8 +964,7 @@ plt_mv7 <- ggplot(aes(x = (red_wine$pH/red_wine$alcohol),
     )
 plt_mv7 <- plt_mv7 + scale_colour_brewer(palette = "RdBu")
 
-fnlplt_3 <- multiplot(plt_mv4, plt_mv5, plt_mv6, plt_mv7, cols = 1)
-fnlplt_3
+multiplot(plt_mv4, plt_mv5, plt_mv6, plt_mv7, cols = 1)
 ```
 
 Based on bi-variate exploration of variables a number of candidates exist
