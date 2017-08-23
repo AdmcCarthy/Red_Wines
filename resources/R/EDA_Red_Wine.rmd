@@ -598,6 +598,9 @@ Chlorides and residual sugars should be checked as these are both highly
 dispersed variables so it is difficult to see any correlation in this pair
 plot.
 
+An alternative way to view which variables are correlated is with a correlation
+matrix.
+
 ```{r echo=FALSE, scatter_sulf, fig.height = 5, fig.width = 5}
 ggplot(aes(x = red_wine$total.sulfur.dioxide, y = red_wine$free.sulfur.dioxide),
        data = red_wine) +
